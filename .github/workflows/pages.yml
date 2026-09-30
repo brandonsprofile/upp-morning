@@ -1,0 +1,78 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_ref:
+        description: Commit, tag, or branch to deploy (use a last-known-good SHA to roll back)
+        required: false
+        default: main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      release_sha: ${{ steps.release.outputs.sha }}
+    steps:
+      - name: Check out release
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.deploy_ref || github.sha }}
+
+      - name: Select Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Record release SHA
+        id: release
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Validate
+        run: npm run check
+
+      - name: Build
+        env:
+          RELEASE_SHA: ${{ steps.release.outputs.sha }}
+        run: npm run build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Check out smoke test
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.deploy_ref || github.sha }}
+
+      - name: Verify live release
+        env:
+          SMOKE_URL: ${{ steps.deployment.outputs.page_url }}
+          RELEASE_SHA: ${{ needs.build.outputs.release_sha }}
+        run: node scripts/smoke.mjs
