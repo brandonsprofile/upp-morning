@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#EBEBEB">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>UPP! — Morgon</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <style>
+    @font-face {
+      font-family: "Geist";
+      src: url("https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@latest/files/geist-latin-wght-normal.woff2") format("woff2-variations");
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      color-scheme: light;
+      --canvas: #ebebeb;
+      --ink: #101010;
+      --blue: #315cff;
+      --yellow: #efff38;
+      --coral: #ff5a5f;
+      --green: #36d676;
+      --white: #ffffff;
+      --border: 2px solid var(--ink);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: #bcbcbc;
+      color: var(--ink);
+      font-family: "Geist", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font: inherit; color: inherit; }
+
+    .app {
+      position: relative;
+      width: min(100%, 430px);
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: max(12px, env(safe-area-inset-top)) 18px max(26px, env(safe-area-inset-bottom));
+      overflow: hidden;
+      background: var(--canvas);
+      isolation: isolate;
+    }
+
+    .app::before {
+      content: "VAKNA  VAKNA  VAKNA";
+      position: absolute;
+      z-index: -2;
+      top: 178px;
+      left: -26px;
+      width: 560px;
+      color: rgba(16, 16, 16, 0.055);
+      font-size: 58px;
+      font-weight: 900;
+      line-height: .78;
+      letter-spacing: -5px;
+      transform: rotate(-8deg);
+    }
+
+    .status-bar {
+      height: 30px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 2px 4px 0;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -.25px;
+    }
+
+    .status-icons { display: flex; align-items: center; gap: 6px; }
+    .signal { letter-spacing: -2px; font-size: 12px; }
+    .battery {
+      width: 22px;
+      height: 10px;
+      padding: 1px;
+      border: 1.5px solid var(--ink);
+      border-radius: 3px;
+      position: relative;
+    }
+    .battery::before { content: ""; display: block; width: 80%; height: 100%; background: var(--ink); border-radius: 1px; }
+    .battery::after { content: ""; position: absolute; right: -3px; top: 2px; width: 2px; height: 4px; background: var(--ink); border-radius: 0 1px 1px 0; }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-top: 2px;
+    }
+
+    .eyebrow {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 760;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .class-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      background: var(--yellow);
+      border: var(--border);
+      border-radius: 999px;
+      box-shadow: 3px 3px 0 var(--ink);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      transform: rotate(2deg);
+    }
+
+    .class-chip::before { content: ""; width: 7px; height: 7px; background: var(--coral); border: 1.5px solid var(--ink); border-radius: 50%; }
+
+    .hero {
+      position: relative;
+      margin-top: -2px;
+      height: 164px;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-size: clamp(110px, 32vw, 138px);
+      font-weight: 900;
+      line-height: .88;
+      letter-spacing: -.1em;
+      color: var(--blue);
+      -webkit-text-stroke: 2px var(--ink);
+      text-shadow: 5px 5px 0 var(--yellow), 8px 8px 0 var(--ink);
+      transform: translateX(-6px);
+    }
+
+    .sunburst {
+      position: absolute;
+      right: -12px;
+      top: 84px;
+      width: 83px;
+      height: 83px;
+      display: grid;
+      place-items: center;
+      background: var(--coral);
+      border: var(--border);
+      border-radius: 50%;
+      box-shadow: 4px 4px 0 var(--ink);
+      transform: rotate(8deg);
+    }
+
+    .sunburst span { font-size: 20px; font-weight: 900; line-height: .86; text-align: center; text-transform: uppercase; }
+
+    .commute {
+      position: relative;
+      z-index: 1;
+      border: var(--border);
+      border-radius: 24px;
+      background: var(--green);
+      box-shadow: 5px 5px 0 var(--ink);
+      overflow: hidden;
+    }
+
+    .commute-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 16px 16px 10px;
+    }
+
+    .commute h2 {
+      margin: 0;
+      font-size: 37px;
+      line-height: .84;
+      font-weight: 900;
+      letter-spacing: -.065em;
+      text-transform: uppercase;
+    }
+
+    .weather {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .weather-symbol { font-size: 25px; line-height: 1; }
+
+    .route-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-top: var(--border);
+      background: rgba(255,255,255,.3);
+    }
+
+    .route-detail { padding: 10px 12px 11px; border-right: var(--border); }
+    .route-detail:last-child { border-right: 0; }
+    .route-detail small { display: block; margin-bottom: 2px; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+    .route-detail strong { font-size: 17px; font-weight: 850; letter-spacing: -.04em; }
+
+    .switcher {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 13px 0 15px;
+    }
+
+    .switcher button {
+      min-height: 44px;
+      border: var(--border);
+      border-radius: 999px;
+      background: transparent;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .025em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .switcher button[aria-pressed="true"] { background: var(--ink); color: var(--white); }
+
+    .calm {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .calm-copy { flex: 1; }
+    .calm-copy p { margin: 0; }
+    .calm-copy .small { font-size: 11px; font-weight: 750; text-transform: uppercase; letter-spacing: .07em; }
+    .calm-copy .big { margin-top: 3px; font-size: 22px; line-height: .95; font-weight: 900; letter-spacing: -.055em; text-transform: uppercase; }
+
+    .countdown {
+      min-width: 104px;
+      padding: 9px 10px 8px;
+      background: var(--coral);
+      border: var(--border);
+      box-shadow: 3px 3px 0 var(--ink);
+      transform: rotate(-2deg);
+      text-align: center;
+    }
+
+    .countdown small { display: block; font-size: 8px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .countdown strong { display: block; font-variant-numeric: tabular-nums; font-size: 23px; font-weight: 900; letter-spacing: -.06em; }
+
+    .routine {
+      padding: 15px;
+      background: var(--white);
+      border: var(--border);
+      border-radius: 24px;
+      box-shadow: 5px 5px 0 var(--ink);
+    }
+
+    .routine-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .routine-label { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .routine-count { font-size: 11px; font-weight: 750; }
+
+    .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 9px 0 13px; }
+    .step { height: 7px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--canvas); overflow: hidden; }
+    .step.done { background: var(--blue); }
+    .step.active { background: var(--yellow); }
+
+    .task-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .task h3 { margin: 0; font-size: 30px; line-height: .92; font-weight: 900; letter-spacing: -.06em; text-transform: uppercase; }
+    .task p { margin: 5px 0 0; color: #626262; font-size: 11px; font-weight: 650; }
+
+    .done-button {
+      flex: 0 0 74px;
+      aspect-ratio: 1;
+      border: var(--border);
+      border-radius: 50%;
+      background: var(--yellow);
+      box-shadow: 3px 3px 0 var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      transform: rotate(4deg);
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease;
+    }
+
+    .done-button:active { transform: translate(3px, 3px) rotate(4deg); box-shadow: none; }
+
+    .next-up { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1.5px dashed #969696; color: #5c5c5c; font-size: 10px; font-weight: 700; }
+
+    .mantra {
+      margin: 16px 0 2px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 780;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .home-indicator {
+      width: 124px;
+      height: 5px;
+      margin: 13px auto 0;
+      background: var(--ink);
+      border-radius: 999px;
+    }
+
+    @media (min-width: 431px) {
+      body { padding: 24px 0; }
+      .app { min-height: 844px; border-radius: 42px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+    }
+
+    @media (max-height: 760px) {
+      .hero { height: 140px; }
+      .hero-title { font-size: 108px; }
+      .sunburst { top: 70px; width: 72px; height: 72px; }
+      .commute-head { padding-top: 13px; }
+      .switcher { margin: 10px 0 11px; }
+      .calm { margin-bottom: 11px; }
+      .routine { padding: 13px 15px; }
+      .mantra { margin-top: 12px; }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .sunburst { animation: bob 3s ease-in-out infinite; }
+      @keyframes bob { 50% { transform: rotate(14deg) translateY(-4px); } }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="UPP morgonöversikt">
+    <div class="status-bar" aria-hidden="true">
+      <span>07:07</span>
+      <span class="status-icons"><span class="signal">▮▮▮▮</span><span>◒</span><span class="battery"></span></span>
+    </div>
+
+    <header class="topline">
+      <p class="eyebrow">God morgon, Brandon</p>
+      <div class="class-chip">Svenska · 08:30</div>
+    </header>
+
+    <section class="hero" aria-labelledby="wake-title">
+      <h1 class="hero-title" id="wake-title">UPP!</h1>
+      <div class="sunburst" aria-label="Du hinner"><span>DU<br>HINNER</span></div>
+    </section>
+
+    <section class="commute" id="commute-card" aria-live="polite">
+      <div class="commute-head">
+        <h2 id="route-title">Cykel<br>idag!</h2>
+        <div class="weather"><span class="weather-symbol" id="weather-symbol">☀</span><span id="weather-copy">8° · Torrt</span></div>
+      </div>
+      <div class="route-details">
+        <div class="route-detail"><small>Restid</small><strong id="travel-time">22 min</strong></div>
+        <div class="route-detail"><small>Åk senast</small><strong id="leave-time">07:54</strong></div>
+        <div class="route-detail"><small>Vind</small><strong id="route-note">Lätt</strong></div>
+      </div>
+    </section>
+
+    <div class="switcher" aria-label="Välj resesätt">
+      <button type="button" id="bike-button" aria-pressed="true">Cykel · Bäst idag</button>
+      <button type="button" id="metro-button" aria-pressed="false">T-bana · 07:43</button>
+    </div>
+
+    <section class="calm" aria-label="Tidsmarginal">
+      <div class="calm-copy">
+        <p class="small">Allt är under kontroll</p>
+        <p class="big" id="calm-message">12 min lugn tid.</p>
+      </div>
+      <div class="countdown">
+        <small>Gå om</small>
+        <strong id="countdown">00:47:00</strong>
+      </div>
+    </section>
+
+    <section class="routine" aria-labelledby="task-title">
+      <div class="routine-top">
+        <span class="routine-label">Din rutin</span>
+        <span class="routine-count" id="routine-count">3 av 5</span>
+      </div>
+      <div class="steps" aria-hidden="true" id="steps">
+        <span class="step done"></span><span class="step done"></span><span class="step active"></span><span class="step"></span><span class="step"></span>
+      </div>
+      <div class="task-row">
+        <div class="task">
+          <h3 id="task-title">Ät frukost</h3>
+          <p id="task-detail">Du har 8 minuter. Ingen stress.</p>
+        </div>
+        <button class="done-button" type="button" id="done-button">Klar!</button>
+      </div>
+      <div class="next-up"><span id="next-task">Nästa: Packa kursboken</span><span id="next-time">3 min</span></div>
+    </section>
+
+    <p class="mantra">En morgon närmare flytande svenska →</p>
+    <div class="home-indicator" aria-hidden="true"></div>
+  </main>
+
+  <script>
+    const routes = {
+      bike: {
+        title: "Cykel<br>idag!", weatherSymbol: "☀", weather: "8° · Torrt",
+        travel: "22 min", leave: "07:54", note: "Lätt", calm: "12 min lugn tid.",
+        countdown: 47 * 60, color: "#36d676"
+      },
+      metro: {
+        title: "T-bana<br>07:43", weatherSymbol: "●", weather: "I tid · Linje 17",
+        travel: "31 min", leave: "07:34", note: "Skarpnäck", calm: "3 min marginal.",
+        countdown: 27 * 60, color: "#ff5a5f"
+      }
+    };
+
+    const tasks = [
+      ["Ät frukost", "Du har 8 minuter. Ingen stress.", "Nästa: Packa kursboken", "3 min"],
+      ["Packa boken", "Kursbok, penna och nycklar.", "Nästa: Ta på jackan", "2 min"],
+      ["Ta på jackan", "Cykelhjälmen också!", "Sedan: På väg till svenskan", "Nu kör vi"]
+    ];
+
+    let seconds = routes.bike.countdown;
+    let taskIndex = 0;
+    let progress = 3;
+
+    const $ = (id) => document.getElementById(id);
+
+    function selectRoute(name) {
+      const route = routes[name];
+      $("route-title").innerHTML = route.title;
+      $("weather-symbol").textContent = route.weatherSymbol;
+      $("weather-copy").textContent = route.weather;
+      $("travel-time").textContent = route.travel;
+      $("leave-time").textContent = route.leave;
+      $("route-note").textContent = route.note;
+      $("calm-message").textContent = route.calm;
+      $("commute-card").style.background = route.color;
+      $("bike-button").setAttribute("aria-pressed", String(name === "bike"));
+      $("metro-button").setAttribute("aria-pressed", String(name === "metro"));
+      seconds = route.countdown;
+      renderCountdown();
+    }
+
+    function renderCountdown() {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      $("countdown").textContent = [hours, minutes, secs].map(value => String(value).padStart(2, "0")).join(":");
+    }
+
+    function finishTask() {
+      if (taskIndex < tasks.length - 1) {
+        taskIndex += 1;
+        progress = Math.min(5, progress + 1);
+        const task = tasks[taskIndex];
+        $("task-title").textContent = task[0];
+        $("task-detail").textContent = task[1];
+        $("next-task").textContent = task[2];
+        $("next-time").textContent = task[3];
+        $("routine-count").textContent = `${progress} av 5`;
+        [...$("steps").children].forEach((step, index) => {
+          step.className = index < progress ? "step done" : index === progress ? "step active" : "step";
+        });
+      } else {
+        $("task-title").textContent = "Redo att gå!";
+        $("task-detail").textContent = "Svenskan väntar på dig.";
+        $("next-task").textContent = "Cykla lugnt";
+        $("next-time").textContent = "22 min";
+        $("routine-count").textContent = "5 av 5";
+        [...$("steps").children].forEach(step => step.className = "step done");
+        $("done-button").textContent = "Kör!";
+      }
+    }
+
+    $("bike-button").addEventListener("click", () => selectRoute("bike"));
+    $("metro-button").addEventListener("click", () => selectRoute("metro"));
+    $("done-button").addEventListener("click", finishTask);
+
+    renderCountdown();
+    setInterval(() => {
+      if (seconds > 0) seconds -= 1;
+      renderCountdown();
+    }, 1000);
+  </script>
+</body>
+</html>
